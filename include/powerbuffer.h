@@ -2,7 +2,7 @@
 #define POWER_H
 #include <stdint.h>
 #include <stdbool.h>
-
+#include <stdlib.h>
 /* -----------------------------Utility--------------------------- */
 #define auto __auto_type
 #define PowerInline inline __attribute__((always_inline))
@@ -26,6 +26,13 @@ typedef uint64_t CursorPosition;
 /*---------------------------Constants-------------------------*/
 
 #define DEFAULT_ALLOCA_SIZE 2
+
+/*---------------------------Macros for functions---------------*/
+
+#define left_ele(buff) buff->gap_start
+#define gap(buff) buff->gap_end - buff->gap_start + 1
+#define right_ele(buff) buff->total_size - gap(buff) - right_ele(buff) 
+#define last(buff) buff->total_size - buff->gap_start - gap(buff) + buff->gap_end
 
 /**
  *    Total_size = 10 // this is gap_size
@@ -64,6 +71,17 @@ CursorPosition p_idx(PowerBuffer p_buffer[static 1],CursorPosition vidx);
 
 void p_reallocate(PowerBuffer p_buffer[static 1],int reallocator_size);
 
+size_t p_gap_len(PowerBuffer p_buffer[static 1]);
+
+size_t e_len(PowerBuffer p_buffer[static 1]);
+
+size_t p_gap(PowerBuffer p_buffer[static 1]);
+
+size_t p_left_ele(PowerBuffer p_buffer[static 1]);
+
+size_t p_right_ele(PowerBuffer p_buffer[static 1]);
+
+size_t p_last_index(PowerBuffer p_buffer[static 1]);
 
 /**Most oftenly we will be making these functions into inline functions*/
 void p_left(PowerBuffer p_buffer[static 1],CursorPosition pos);

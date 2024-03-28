@@ -43,15 +43,40 @@ PowerInline PowerBuffer power_init(size_t init_size){
 }
 
 PowerInline CursorPosition p_idx(PowerBuffer p_buffer[static 1],CursorPosition vidx){
-  assert(vidx < p_buffer->total_size);
+  
+  assert(vidx <= p_buffer->total_size);
 
-  if(vidx > p_buffer->gap_start){
+  if(vidx < p_buffer->gap_start){
     return vidx;
   }else{
     auto actual_idx = vidx + (p_buffer->gap_end - p_buffer->gap_start + 1);
-    assert(actual_idx < p_buffer->total_size);
+    assert(actual_idx <= p_buffer->total_size);  // debug this particular thing in here 
     return actual_idx;
   }
+}
+
+PowerInline size_t p_gap_len(PowerBuffer p_buffer[static 1]){
+  return p_buffer->gap_end - p_buffer->gap_start + 1;
+}
+
+PowerInline size_t e_len(PowerBuffer p_buffer[static 1]){
+  return p_buffer->total_size - p_gap_len(p_buffer); 
+}
+
+PowerInline size_t p_gap(PowerBuffer p_buffer[static 1]){
+  return p_buffer->gap_end - p_buffer->gap_start + 1;
+}
+
+PowerInline size_t p_left_ele(PowerBuffer p_buffer[static 1]){
+  return p_buffer->gap_start;
+}
+
+PowerInline size_t p_right_ele(PowerBuffer p_buffer[static 1]){
+  return p_buffer->total_size - p_gap(p_buffer) - p_left_ele(p_buffer);
+}
+
+PowerInline size_t p_last_index(PowerBuffer p_buffer[static 1]){
+  return p_buffer->total_size - p_gap_len(p_buffer) - p_left_ele(p_buffer) + p_buffer->gap_end;
 }
 
 /**
@@ -87,7 +112,7 @@ void p_reallocate(PowerBuffer p_buffer[static 1],int reallocator_size){
   CursorPosition j = left_element + p_buffer->gap_size*alloca_size;
   
   while(i < p_buffer->total_size && j < new_total){
-    printf("%ld\n",i);
+//    printf("%ld\n",i);
     new_buffer[j] = p_buffer->buffer[i]; 
     i++;
     j++;
@@ -123,9 +148,13 @@ PowerInline void p_right(PowerBuffer p_buffer[static 1],CursorPosition pos){
 }
 
 void p_move_cursor(PowerBuffer p_buffer[static 1],CursorPosition pos){
-  
+   
   do_assert(p_buffer->gap_start >= p_buffer->gap_end,p_reallocate(p_buffer,-1));
   
+  // for testing purpose only 
+  //assert(pos < p_buffer->total_size);
+  // for testing purpose only
+
   if(pos > p_buffer->gap_start){
     p_right(p_buffer,pos);
   }else{
@@ -133,9 +162,10 @@ void p_move_cursor(PowerBuffer p_buffer[static 1],CursorPosition pos){
   }
 }
 
-
+/* Making this cursor friendly */
 void p_insert_char_at(PowerBuffer p_buffer[static 1],CursorPosition pos, char ch){
-
+  pos = p_idx(p_buffer,pos);
+  
   do_assert(p_buffer->gap_start >= p_buffer->gap_end,p_reallocate(p_buffer,-1));
 
   if(pos > p_buffer->gap_start){
@@ -176,6 +206,7 @@ void p_insert_string_at(PowerBuffer p_buffer[static 1],CursorPosition pos,char* 
   }
 }
 
+// making cursor friendly 
 void p_append_string(PowerBuffer p_buffer[static 1],char *str){
   auto s_len = strlen(str);
   auto remaining_gap_size = p_buffer->gap_end - p_buffer->gap_start;
@@ -194,18 +225,19 @@ void p_append_string(PowerBuffer p_buffer[static 1],char *str){
 /**
  *  
  *  DELETING CHARACTER AT GIVEN POSITION
- * 
+ *  make cursor friendly  
  */
 void p_delete_char_at(PowerBuffer p_buffer[static 1],CursorPosition pos){
-  
+  pos = p_idx(p_buffer,pos); 
   if(p_buffer->gap_start - 1 == pos){
     p_buffer->gap_start--;
+    p_buffer->buffer[p_buffer->gap_start] = '_';   // for testing purpose
   }else{
     p_move_cursor(p_buffer,pos + 1);
     p_buffer->gap_start--;
+    p_buffer->buffer[p_buffer->gap_start] = '_';   // for testing purpose
   }
 
-  unimplemented;
 }
 
 /*
@@ -216,7 +248,21 @@ void p_delete_char_at(PowerBuffer p_buffer[static 1],CursorPosition pos){
 
 #if TEST_OF
 int main(){
+  PowerBuffer a = power_init(3);
+  p_append_char(&a,'m');
+  p_append_char(&a,'e');
+  p_append_char(&a,'l');
+  p_append_char(&a,'w');
+  p_insert_char_at(&a,2,'o'); 
   
+  p_insert_char_at(&a,5,'M');
+  //p_delete_char_at(&a,5);
+  
+  for(int i = 0; i < a.total_size;i++){
+    printf("-> %c\n",a.buffer[i]);
+  }
+  
+  printf("%ld %ld\n",a.gap_start,a.gap_end);
   return 0;
 }
 #endif
@@ -291,8 +337,8 @@ int main(){
   auto buffer = power_init(1);
   
   //p_reallocate(&buffer);
-   p_append_char(&buffer,'a');
-   p_insert_char_at(&buffer,0,'o');
+  p_append_char(&buffer,'a');
+  p_insert_char_at(&buffer,0,'o');
 
   for(size_t i = 0;i < buffer.total_size;i++){
     printf("%c->\n",buffer.buffer[i]);
