@@ -1,8 +1,10 @@
 #ifndef POWER_H
 #define POWER_H
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
 /* -----------------------------Utility--------------------------- */
 #define auto __auto_type
 #define PowerInline inline __attribute__((always_inline))
@@ -100,10 +102,22 @@ void p_append_char(PowerBuffer p_buffer[static 1],char ch);
 void p_insert_string_at(PowerBuffer p_buffer[static 1],CursorPosition pos,char* str);
 
 void p_append_string(PowerBuffer p_buffer[static 1],char *str);
+
 /**
- *  
- *  DELETING CHARACTER AT GIVEN POSITION
- * 
+ *  DELETING CHARACTER AT GIVEN POSITION 
  */
 void p_delete_char_at(PowerBuffer p_buffer[static 1],CursorPosition pos);
+
+
+/*  
+ *  Experimental function for draining of PowerBuffer into a normal char pointer (cstring)
+ *  This is Experimental Api We'll soon introduce another algorithm for efficiently draining 
+ *  the value
+ *
+ *  it returns an allocated memory please be sure to free it
+ * **/
+
+char* p_drain(PowerBuffer p_buffer[static 1]);
+
+void p_free(PowerBuffer p_buffer[static 1]);
 #endif // POWER_H

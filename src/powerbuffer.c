@@ -240,29 +240,33 @@ void p_delete_char_at(PowerBuffer p_buffer[static 1],CursorPosition pos){
 
 }
 
-/*
- *  problem with moving right in the direction in here
- * we will make it powerfull and optimized at the end
- * this function is producing error
- * */
+char* p_drain(PowerBuffer p_buffer[static 1]){
+  use(p_buffer);
+  unimplemented;
+}
+
+/** Free the Internal Buffer **/
+void p_free(PowerBuffer p_buffer[static 1]){
+  free(p_buffer->buffer);
+  p_buffer->buffer = NULL;
+  p_buffer = NULL;
+}
 
 #if TEST_OF
 int main(){
-  PowerBuffer a = power_init(3);
-  p_append_char(&a,'m');
-  p_append_char(&a,'e');
-  p_append_char(&a,'l');
-  p_append_char(&a,'w');
-  p_insert_char_at(&a,2,'o'); 
+  auto a = power_init(3);
   
-  p_insert_char_at(&a,5,'M');
-  //p_delete_char_at(&a,5);
-  
-  for(int i = 0; i < a.total_size;i++){
-    printf("-> %c\n",a.buffer[i]);
+  p_append_char(&a,'a');
+  p_append_char(&a,'L');
+  p_append_char(&a,'Y');
+  p_insert_char_at(&a,1,'K');
+
+  for(size_t i = 0; i < a.total_size;i++){
+    printf("MEOW -> %c\n",a.buffer[i]);
   }
+  printf("\n");
   
-  printf("%ld %ld\n",a.gap_start,a.gap_end);
+  printf(" -> %ld\n",p_left_ele(&a));
   return 0;
 }
 #endif
